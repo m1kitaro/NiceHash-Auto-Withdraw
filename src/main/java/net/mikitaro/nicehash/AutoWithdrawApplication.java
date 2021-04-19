@@ -14,12 +14,12 @@ import java.util.Map;
 public class AutoWithdrawApplication implements RequestHandler<Map<String, Object>, Map<String, Object>> {
     static final String URL_ROOT = "https://api2.nicehash.com/"; // NiceHash 本番APIのURLです。
     static final String ORG_ID = System.getenv("ORG_ID"); // API Keys の Organization ID
-    static final String API_KEY = System.getenv("API_KEY");; // API Key
-    static final String API_SECRET = System.getenv("API_SECRET");; // API Secret
+    static final String API_KEY = System.getenv("API_KEY");// API Key
+    static final String API_SECRET = System.getenv("API_SECRET");// API Secret
     static final BigDecimal WITHDRAW_THRESHOLD = new BigDecimal(System.getenv("WITHDRAW_THRESHOLD")); // 送金する閾値です。
     static final BigDecimal WITHDRAW_AMOUNT = new BigDecimal(System.getenv("WITHDRAW_AMOUNT")); // 送金する金額です。
-    static final String WITHDRAW_ADDRESS_ID = System.getenv("WITHDRAW_ADDRESS_ID");; // withdraw address の ID
-    static final String WEBHOOK_URL = System.getenv("WEBHOOK_URL");; // 結果送信用のDiscord webhook URL
+    static final String WITHDRAW_ADDRESS_ID = System.getenv("WITHDRAW_ADDRESS_ID");// withdraw address の ID
+    static final String WEBHOOK_URL = System.getenv("WEBHOOK_URL");// 結果送信用のDiscord webhook URL
 
     /**
      * AWS Lambda のハンドラーメソッドです。
@@ -64,7 +64,7 @@ public class AutoWithdrawApplication implements RequestHandler<Map<String, Objec
 
         System.out.println("add fee : " + addFee);
         if (addFee.compareTo(new BigDecimal("0")) == 0) {
-            withdraw(api, time);
+            withdraw(api, time, balance);
             discord.post("{\"content\":\"" + "@here success!! fee = " + addFee.toString() + "\"}");
         } else {
             discord.post("{\"content\":\"" + "no withdraw fee = " + addFee.toString() + "\"}");
@@ -72,8 +72,9 @@ public class AutoWithdrawApplication implements RequestHandler<Map<String, Objec
         return output;
     }
 
-    private void withdraw(Api api, String time) {
-        String payload = "{\"currency\": \"BTC\",\"amount\": \"" + WITHDRAW_AMOUNT.toString() + "\",\"withdrawalAddressId\": \"" + WITHDRAW_ADDRESS_ID + "\"}";
+    private void withdraw(Api api, String time, BigDecimal balance) {
+        BigDecimal withdrawAmount = (WITHDRAW_AMOUNT.compareTo(new BigDecimal("0")) == 0) ? balance : WITHDRAW_AMOUNT;
+        String payload = "{\"currency\": \"BTC\",\"amount\": \"" + withdrawAmount.toString() + "\",\"withdrawalAddressId\": \"" + WITHDRAW_ADDRESS_ID + "\"}";
         String result = api.post("main/api/v2/accounting/withdrawal", payload, time, true);
         System.out.println(result);
     }
