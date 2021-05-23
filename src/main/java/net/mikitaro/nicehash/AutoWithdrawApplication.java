@@ -53,7 +53,7 @@ public class AutoWithdrawApplication implements RequestHandler<Map<String, Objec
             System.out.println("送金対象");
         } else {
             System.out.println("送金しない");
-            discord.post("{\"content\":\"" + "no withdraw balance = " + balance.toString() + "\"}");
+            discord.post("{\"content\":\"" + "no withdraw.\\nbalance = [" + balance.toPlainString() + "]\"}");
             return output;
         }
         String feeResponse = api.get("main/api/v2/public/service/fee/info", false, time);
@@ -64,10 +64,13 @@ public class AutoWithdrawApplication implements RequestHandler<Map<String, Objec
 
         System.out.println("add fee : " + addFee);
         if (addFee.compareTo(new BigDecimal("0")) == 0) {
+            String payload = "{\"content\":\"" + "@here success!!\\nfee = [" + addFee.toPlainString() + "]\"}";
             withdraw(api, time, balance);
-            discord.post("{\"content\":\"" + "@here success!! fee = " + addFee.toString() + "\"}");
+            discord.post(payload);
         } else {
-            discord.post("{\"content\":\"" + "no withdraw fee = " + addFee.toString() + "\"}");
+            String payload = "{\"content\":\"" + "no withdraw.\\nbalance = [" + balance.toPlainString() + "]\\nfee = [" + addFee.toPlainString() + "]\"}";
+            System.out.println(payload);
+            discord.post(payload);
         }
         return output;
     }
